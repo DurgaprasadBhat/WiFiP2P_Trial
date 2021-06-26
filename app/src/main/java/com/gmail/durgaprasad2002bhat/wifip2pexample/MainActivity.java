@@ -4,16 +4,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         btnDiscover.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onClick(View v) {
 
@@ -76,6 +82,28 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(int reason) {
                         connectionStatus.setText("Discovery Failed");
 
+                    }
+                });
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               final  WifiP2pDevice  device = deviceArray[position];
+                WifiP2pConfig config =  new WifiP2pConfig();
+                config.deviceAddress= device.deviceAddress;
+
+                mManager.connect(mChannel, config, new WifiP2pManager.ActionListener(){
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(getApplicationContext(), "Connecter to"+device.deviceName, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                          Toast.makeText(getApplicationContext(), "Not connected", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -129,6 +157,21 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "NO Dvices found", Toast.LENGTH_SHORT).show();;
                 }
             }
+        }
+    };
+
+
+    WifiP2pManager.ConnectionInfoListener connectionInfoListener = new WifiP2pManager.ConnectionInfoListener() {
+        @Override
+        public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pinfo) {
+           final InetAddress groupOwnerAddress = wifiP2pinfo.groupOwnerAddress;
+
+           if(wifiP2pinfo.groupFormed&& wifiP2pinfo.isGroupOwner){
+               connectionStatus.setText("Host");
+
+           }else if(wifiP2pinfo.groupFormed){
+               connectionStatus.setText("Client");
+           }
         }
     };
     @Override
