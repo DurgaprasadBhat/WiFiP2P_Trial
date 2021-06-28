@@ -12,12 +12,12 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
-public class WiFiDirectBroadcastReciever extends BroadcastReceiver {
+public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
     private MainActivity mActivity;
 
-    public WiFiDirectBroadcastReciever(WifiP2pManager mManager, WifiP2pManager.Channel mChannel, MainActivity mactivity) {
+    public WiFiDirectBroadcastReceiver(WifiP2pManager mManager, WifiP2pManager.Channel mChannel, MainActivity mactivity) {
         this.mActivity = mactivity;
         this.mChannel = mChannel;
         this.mManager = mManager;
